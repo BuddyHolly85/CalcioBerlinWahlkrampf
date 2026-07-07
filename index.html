@@ -1,0 +1,2434 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wahlkrampf - Dashboard & Auswertung (Öffentliche Version)</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Design Tokens */
+    :root {
+      --bg-dark: #05050a;
+      --bg-card: rgba(13, 13, 25, 0.4);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-blue: #00d2ff;
+      --accent-purple: #9d4edd;
+      --accent-pink: #ff007f;
+      --text-main: #f8f9fa;
+      --text-muted: #8e9aaf;
+      --gradient-primary: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      --gradient-glow: linear-gradient(135deg, rgba(0, 210, 255, 0.15), rgba(157, 78, 221, 0.15));
+      --glow-shadow: 0 8px 32px 0 rgba(0, 210, 255, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(157, 78, 221, 0.05) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    h1, h2, h3, .font-display {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Header / Navbar */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      background: rgba(5, 5, 10, 0.8);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 0;
+    }
+
+    .nav-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--text-main);
+    }
+
+    /* Sections */
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 0 2rem 0;
+      position: relative;
+    }
+
+    /* Scroll animations */
+    .fade-in-section {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      visibility: hidden;
+    }
+
+    .fade-in-section.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+    }
+
+    /* HERO SECTION */
+    #hero {
+      text-align: center;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: 400px;
+      background: var(--gradient-primary);
+      filter: blur(150px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    .tagline {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      color: var(--accent-blue);
+      box-shadow: var(--glow-shadow);
+    }
+
+    .hero-title {
+      font-size: 4rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      letter-spacing: -2px;
+    }
+
+    .hero-title span {
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 3rem auto;
+      line-height: 1.6;
+    }
+
+    .scroll-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .scroll-indicator i {
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-8px);
+      }
+      60% {
+        transform: translateY(-4px);
+      }
+    }
+
+    /* LEADERBOARD SECTION */
+    .section-header {
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      letter-spacing: -1px;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    .leaderboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    /* Podium places styling */
+    .card.rank-1::before {
+      background: linear-gradient(90deg, #ffd700, #ffa500);
+      opacity: 1;
+    }
+    .card.rank-2::before {
+      background: linear-gradient(90deg, #c0c0c0, #a9a9a9);
+      opacity: 1;
+    }
+    .card.rank-3::before {
+      background: linear-gradient(90deg, #cd7f32, #8b5a2b);
+      opacity: 1;
+    }
+
+    .rank-badge {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    .rank-1 .rank-badge {
+      background: rgba(255, 215, 0, 0.1);
+      border-color: rgba(255, 215, 0, 0.3);
+      color: #ffd700;
+    }
+    .rank-2 .rank-badge {
+      background: rgba(192, 192, 192, 0.1);
+      border-color: rgba(192, 192, 192, 0.3);
+      color: #c0c0c0;
+    }
+    .rank-3 .rank-badge {
+      background: rgba(205, 127, 50, 0.1);
+      border-color: rgba(205, 127, 50, 0.3);
+      color: #cd7f32;
+    }
+
+    .card-title {
+      font-size: 1.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-subtitle {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2rem;
+    }
+
+    .stat-large {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .stat-bar-container {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 9999px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .stat-bar {
+      height: 100%;
+      border-radius: 9999px;
+      background: var(--gradient-primary);
+      width: 0;
+      transition: width 1.5s cubic-bezier(0.1, 1, 0.1, 1);
+    }
+
+    .rank-1 .stat-bar { background: linear-gradient(90deg, #ffd700, #ffa500); }
+    .rank-2 .stat-bar { background: linear-gradient(90deg, #c0c0c0, #a9a9a9); }
+    .rank-3 .stat-bar { background: linear-gradient(90deg, #cd7f32, #8b5a2b); }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .stat-row span strong {
+      color: var(--text-main);
+    }
+
+    /* Guest card grid */
+    .guests-container {
+      margin-top: 3rem;
+    }
+    
+    .guests-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .guests-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .guest-card {
+      background: rgba(13, 13, 25, 0.2);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .guest-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .guest-stats {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .guest-stats strong {
+      color: var(--text-main);
+      font-size: 1.1rem;
+    }
+
+    /* STORYTELLING / SCROLLING SECTION */
+    .story-wrapper {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .story-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    .story-step {
+      opacity: 0.3;
+      transform: translateX(-20px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+
+    .story-step.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .story-step-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: var(--gradient-glow);
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      color: var(--accent-blue);
+    }
+
+    .story-step-title {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .story-step-desc {
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .story-visual {
+      position: sticky;
+      top: 20%;
+      height: 350px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--glow-shadow);
+    }
+
+    .visual-glow {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      filter: blur(100px);
+      opacity: 0.2;
+      animation: rotate 10s infinite linear;
+    }
+
+    .visual-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .visual-value {
+      font-size: 5rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+
+    .visual-label {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* CATALOG SECTION */
+    .catalog-controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex-grow: 1;
+    }
+
+    .search-wrapper i {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1rem 1rem 1rem 3rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 1rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 16px rgba(0, 210, 255, 0.1);
+    }
+
+    .filter-select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1rem 2rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      min-width: 180px;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+    }
+
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      margin-bottom: 2rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.25rem 1.5rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .badge.winner {
+      background: var(--gradient-glow);
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      color: var(--accent-blue);
+    }
+
+    .table-link {
+      color: var(--accent-blue);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .table-link:hover {
+      text-decoration: underline;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-page {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .btn-page:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-page.active {
+      background: var(--gradient-primary);
+      border-color: transparent;
+      font-weight: 700;
+    }
+
+    .btn-page:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 3rem 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .leaderboard-grid {
+        grid-template-columns: 1fr;
+      }
+      .guests-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .story-wrapper {
+        grid-template-columns: 1fr;
+      }
+      .story-visual {
+        position: static;
+        margin-top: 2rem;
+      }
+      .hero-title {
+        font-size: 3rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .guests-grid {
+        grid-template-columns: 1fr;
+      }
+      .catalog-controls {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <div class="container nav-wrapper">
+      <div class="logo">CALCIO.WAHLKRAMPF</div>
+      <div class="nav-links">
+        <a href="#hero" class="active">Home</a>
+        <a href="#stats">Statistiken</a>
+        <a href="#trends">Highlights</a>
+        <a href="#catalog">Episoden</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <div class="hero-glow"></div>
+    <div class="container hero-content">
+      <div class="tagline">Statistische Auswertung</div>
+      <h1 class="hero-title">Wer gewinnt am <span>häufigsten</span>?</h1>
+      <p class="hero-desc">Interaktives Dashboard für alle 114 Episoden des legendären Calcio Berlin Wahlkrampfs. Analysiere Erfolgsquoten, Siege und erkunde alle Folgen.</p>
+      
+      <a href="#stats" class="scroll-indicator">
+        <span>Statistiken ansehen</span>
+        <i data-lucide="chevron-down"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- Leaderboard Section -->
+  <section id="stats" class="fade-in-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Die Leaderboard-Tabelle</h2>
+        <p class="section-desc">Die Erfolgsquote und Gesamtanzahl der Siege aller Stamm-Hosts.</p>
+      </div>
+
+      <!-- Leaders Grid -->
+      <div class="leaderboard-grid" id="leaderboard">
+        <!-- Will be populated dynamically -->
+      </div>
+
+      <!-- Guests list -->
+      <div class="guests-container">
+        <h3 class="guests-title">Gast-Teilnehmer</h3>
+        <div class="guests-grid" id="guests-grid">
+          <!-- Will be populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scrolling Highlights (Tech-product feel) -->
+  <section id="trends" class="fade-in-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Highlights & Insights</h2>
+        <p class="section-desc">Spannende Einblicke in die Daten aus 114 Duellen.</p>
+      </div>
+
+      <div class="story-wrapper">
+        <div class="story-content">
+          <div class="story-step active" data-visual="51" data-label="Nico's Siege">
+            <span class="story-step-badge">Platz 1</span>
+            <h3 class="story-step-title">Nico Heymer dominiert die Arena</h3>
+            <p class="story-step-desc">Mit insgesamt 51 Siegen führt Nico Heymer das Trio unangefochten an. Seine Cases treffen oft genau den Nerv der Community.</p>
+          </div>
+
+          <div class="story-step" data-visual="43" data-label="Christoph's Siege">
+            <span class="story-step-badge">Platz 2</span>
+            <h3 class="story-step-title">Christoph Kröger dicht auf den Fersen</h3>
+            <p class="story-step-desc">Christoph überzeugt durch tiefgehende Recherche und fundierte Argumentation. Mit 43 Siegen und einer Erfolgsquote von fast 40% ist er Nico dicht auf den Fersen.</p>
+          </div>
+
+          <div class="story-step" data-visual="18" data-label="Niklas' Siege">
+            <span class="story-step-badge">Platz 3</span>
+            <h3 class="story-step-title">Niklas Levinsohn im Formtief</h3>
+            <p class="story-step-desc">Niklas kämpft oft mit strategischen Absprachen seiner Kollegen. Trotz sensationeller Cases verzeichnet er lediglich 18 Siege.</p>
+          </div>
+          
+          <div class="story-step" data-visual="50" data-label="Mia's Quote (%)">
+            <span class="story-step-badge">Gast-Highlight</span>
+            <h3 class="story-step-title">Mia Güthe als Edeljoker</h3>
+            <p class="story-step-desc">Mia Güthe hat bei ihren 4 Auftritten zwei Siege entführt und hält mit 50.0% die höchste Win-Rate des gesamten Formats.</p>
+          </div>
+        </div>
+
+        <div class="story-visual">
+          <div class="visual-glow"></div>
+          <div class="visual-content">
+            <div class="visual-value" id="visual-value">51</div>
+            <div class="visual-label" id="visual-label">Nico's Siege</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Episode Catalog -->
+  <section id="catalog" class="fade-in-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Episoden-Verzeichnis</h2>
+        <p class="section-desc">Suche, filtere und erkunde alle jemals aufgenommenen Folgen.</p>
+      </div>
+
+      <div class="catalog-controls">
+        <div class="search-wrapper">
+          <i data-lucide="search"></i>
+          <input type="text" class="search-input" id="search-input" placeholder="Nach Titel oder Video ID suchen...">
+        </div>
+        <select class="filter-select" id="winner-filter">
+          <option value="ALL">Alle Gewinner</option>
+          <option value="Nico">Nico</option>
+          <option value="Christoph">Christoph</option>
+          <option value="Niklas">Niklas</option>
+          <option value="Mia">Mia</option>
+        </select>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Folge</th>
+              <th>Titel</th>
+              <th>Teilnehmer</th>
+              <th>Gewinner</th>
+              <th>Video</th>
+            </tr>
+          </thead>
+          <tbody id="episodes-table-body">
+            <!-- Will be populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="pagination">
+        <!-- Will be populated dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Erstellt basierend auf allen 114 YouTube-Episoden von Calcio Berlin. &copy; 2026</p>
+    </div>
+  </footer>
+
+  <script>
+    const wahlkrampfData = {
+  "stats": {
+    "Nico": {
+      "wins": 51,
+      "participations": 114
+    },
+    "Christoph": {
+      "wins": 43,
+      "participations": 109
+    },
+    "Niklas": {
+      "wins": 18,
+      "participations": 110
+    },
+    "Mia": {
+      "wins": 2,
+      "participations": 4
+    },
+    "Grabo": {
+      "wins": 0,
+      "participations": 3
+    },
+    "Alex": {
+      "wins": 0,
+      "participations": 1
+    },
+    "Kier": {
+      "wins": 0,
+      "participations": 1
+    }
+  },
+  "episodes": [
+    {
+      "index": 1,
+      "videoId": "xzQTX_oTPQQ",
+      "title": "Für welches Land solltest Du nach dem DFB-Aus bei der WM halten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 2,
+      "videoId": "OCUyClHNJhs",
+      "title": "Wahlkrampf! Wer oder was war das beste Investment der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 3,
+      "videoId": "dV5AlTtlLaI",
+      "title": "Wahlkrampf! Wer hatte den besten Redemption Arc der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Mia"
+      ],
+      "winner": "Mia"
+    },
+    {
+      "index": 4,
+      "videoId": "mgeCWyQuHnU",
+      "title": "Wahlkrampf! Wer ist der größte Imposter der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 5,
+      "videoId": "1xuL_F2NF54",
+      "title": "Wahlkrampf! Wer ist der beste Spieler dieses Jahrzehnts - bis jetzt?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 6,
+      "videoId": "hXMQO05PMMo",
+      "title": "Wahlkrampf! Wer war der größte Verlierer der Saison 2023/24?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 7,
+      "videoId": "0YlhjDMEt0w",
+      "title": "Wahlkrampf! Wer war der beste Spieler der Saison 2023/24?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 8,
+      "videoId": "VkRglEjoKfY",
+      "title": "Wahlkrampf! Wer war der größte Shooting Star der EM-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 9,
+      "videoId": "jiFbhOZIXY8",
+      "title": "Wahlkrampf! Was war die beste Einzelleistung aller Zeiten in einem EM-Spiel?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 10,
+      "videoId": "mgFk6FEZ7gw",
+      "title": "Wahlkrampf! Was war das beste EM-Tor aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 11,
+      "videoId": "wfa4mmHW4u0",
+      "title": "Wahlkrampf! Was war die beste Europameisterschaft aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 12,
+      "videoId": "3X0XwaILNBs",
+      "title": "Wahlkrampf! Was war die beste Choreo der deutschen Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 13,
+      "videoId": "TtY7_6t7LvQ",
+      "title": "Wahlkrampf! Was war der beste Moment der Bundesliga Saison 23/24?",
+      "participants": [
+        "Nico",
+        "Christoph",
+        "Grabo"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 14,
+      "videoId": "Nta0BZwHSLI",
+      "title": "Wahlkrampf! Wer war der beste Transfer der Saison 23/24?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 15,
+      "videoId": "7OocnjbbDDo",
+      "title": "Wahlkrampf! Wer war der beste Spieler der Bundesliga-Saison 2023/24?",
+      "participants": [
+        "Nico",
+        "Christoph",
+        "Grabo"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 16,
+      "videoId": "r2u5EmbdV1I",
+      "title": "Wahlkrampf! Was war die beste Champions League-Saison eines einzelnen Spielers?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 17,
+      "videoId": "JhsMeHR6Sz8",
+      "title": "Wahlkrampf! Wer ist der beste asiatische Fußballer aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 18,
+      "videoId": "GU_s3RVkrhQ",
+      "title": "Wahlkrampf! Was war der größte Fußballskandal aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Grabo"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 19,
+      "videoId": "oI7XHXQjmPk",
+      "title": "Wahlkrampf! Wer ist der beste türkische Spieler der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Christoph",
+        "Alex"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 20,
+      "videoId": "lkepYRBgBpo",
+      "title": "Wahlkrampf! Welcher Spieler hatte den besten Positionswechsel der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 21,
+      "videoId": "6f5ksk_WTZg",
+      "title": "Wahlkrampf! Wer ist der beste Big Game Player der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 22,
+      "videoId": "AZMy1HRoZlA",
+      "title": "Wahlkrampf! Wer ist der wichtigste BVB-Spieler des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 23,
+      "videoId": "BQIJVG5ry00",
+      "title": "Wahlkrampf! Was ist die gelungenste Rache der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Christoph",
+        "Kier"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 24,
+      "videoId": "5kcewwtyisI",
+      "title": "Wahlkrampf! Wer hat das beste Team-Tor der Fußballgeschichte geschossen?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 25,
+      "videoId": "aSq16QuTMQE",
+      "title": "Wahlkrampf! Wer ist der beste Italiener der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 26,
+      "videoId": "VvBNl4r5qLo",
+      "title": "Wahlkrampf! Was war die dümmste Rote Karte der Bundesliga-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Mia"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 27,
+      "videoId": "Qa4r6x1hDgM",
+      "title": "Wahlkrampf! Wer ist die beste Giraffe der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 28,
+      "videoId": "O4XpwVmMz20",
+      "title": "Wahlkrampf! Was war das beste Fußballjahr aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 29,
+      "videoId": "AzxN7qRZSgo",
+      "title": "Wahlkrampf! Wer ist das beste Angriffstrio der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 30,
+      "videoId": "ExiGmZcB6zE",
+      "title": "Wahlkrampf! Wer ist der sympathischste Fußballer der Welt?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 31,
+      "videoId": "1YYsE8lLvtw",
+      "title": "Wahlkrampf! Wer ist die größte Trainernation der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 32,
+      "videoId": "7lB3i7_WRDQ",
+      "title": "Wahlkrampf! Wer hatte das schlechteste Fußballjahr 2023?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Mia"
+      ],
+      "winner": "Mia"
+    },
+    {
+      "index": 33,
+      "videoId": "l1T7rvFEZCs",
+      "title": "Weihnachts-Wahlkrampf Spezial! Was ist das größte Geschenk der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 34,
+      "videoId": "dzRxi20GH-o",
+      "title": "Wahlkrampf! Wer ist der größte \"The streets won't forget\"-Fußballer aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 35,
+      "videoId": "oSUyJ29Sg8A",
+      "title": "Wahlkrampf! Wer ist der beste deutsche Nicht-Nationalspieler aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 36,
+      "videoId": "gW4B3ep1FQQ",
+      "title": "Wahlkrampf! Was ist die beste Fußballfamilie aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 37,
+      "videoId": "zjdumGm6MEk",
+      "title": "Wahlkrampf! Was ist der größte Trainer-Absturz des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 38,
+      "videoId": "0WdI5UiJY3E",
+      "title": "Wahlkrampf! Wer ist der beste Ausbildungsverein der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 39,
+      "videoId": "h3SZEMXIdME",
+      "title": "Wahlkrampf! Wer spielte die beste individuelle Saison der Premier League-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 40,
+      "videoId": "idDcdKi3YV0",
+      "title": "Wahlkrampf! Wer ist der beste Kroate der Bundesliga-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 41,
+      "videoId": "_5NcIIJ_3Kw",
+      "title": "Wahlkrampf! Was war das beste Unentschieden der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 42,
+      "videoId": "CXZK8689x5U",
+      "title": "Wahlkrampf! Wer ist das größte Bundesliga-Schnäppchen des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 43,
+      "videoId": "eP9jVKT33Bg",
+      "title": "Wahlkrampf! Wer ist der beste deutsche Stürmer des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 44,
+      "videoId": "WjsoAR7FDlE",
+      "title": "Wahlkrampf! Was ist die größte Vereinsrivalität des Fußballs?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 45,
+      "videoId": "lflPHJ-OUio",
+      "title": "Wahlkrampf! Wer ist Europas größte Fußballnation?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 46,
+      "videoId": "QgKoeEX1pjk",
+      "title": "Wahlkrampf! Was ist das beste Maskottchen der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 47,
+      "videoId": "OD2mFx7elEk",
+      "title": "Wahlkrampf! Wer ist der beste Außenverteidiger des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 48,
+      "videoId": "00P1tEVZ4ZM",
+      "title": "Wahlkrampf! Was war das beste Bundesliga-Debüt aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 49,
+      "videoId": "qfeq8eOAOFI",
+      "title": "Wahlkrampf! Wer ist der beste afrikanische Fußballer aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 50,
+      "videoId": "kMZE08JGAx8",
+      "title": "Wahlkrampf! Wer ist das größte One Game Wonder der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 51,
+      "videoId": "0aDkJg71kqg",
+      "title": "Wahlkrampf! Wer hat den besten Spitznamen der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 52,
+      "videoId": "QGrlu6JZSpw",
+      "title": "Wahlkrampf! Was war die beste Leihe der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 53,
+      "videoId": "HZFAoKuggbQ",
+      "title": "Wahlkrampf! Wer ist die beste Nummer 4 der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 54,
+      "videoId": "SSTYSmcS8aw",
+      "title": "Wahlkrampf! Wer ist der beste Torwart der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 55,
+      "videoId": "Wfazg7edGzM",
+      "title": "Wahlkrampf! Was war die beste Bundesliga-Saison aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 56,
+      "videoId": "yiEG3OUMcyE",
+      "title": "Wahlkrampf! Wer war der schlechteste Schalke-Transfer aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 57,
+      "videoId": "fxNq6zvgpPo",
+      "title": "Wahlkrampf! Wer ist der beste Kevin der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 58,
+      "videoId": "uMc2Oqta3fs",
+      "title": "Wahlkrampf! Wer ist das beste Brüderpaar der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 59,
+      "videoId": "1mfV0eTZtq0",
+      "title": "Wahlkrampf! Was war der schlimmste Rückrunden-Absturz der Bundesliga-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 60,
+      "videoId": "9vsDQi0G3b8",
+      "title": "Wahlkrampf! Wer war der beste Spieler der Bundesliga-Saison 22/23?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Mia"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 61,
+      "videoId": "YR3wxRFwWeY",
+      "title": "Kahlkrampf! Wer ist die beste Glatze des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 62,
+      "videoId": "mp3Gre3_d9I",
+      "title": "Wahlkrampf! Was war das beste DFB-Pokal Spiel aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 63,
+      "videoId": "IARo-gAbEkg",
+      "title": "Wahlkrampf! Was war die wichtigste Rettungsaktion der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 64,
+      "videoId": "6nC4FNnB4wM",
+      "title": "Wahlkrampf! Wer ist der beste Brasilianer des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 65,
+      "videoId": "6VZaWgxEJyA",
+      "title": "Wahlkrampf! Welcher Spieler hätte seit 2000 einen Ballon d'Or  am meisten verdient gehabt?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 66,
+      "videoId": "3QNiayVUv8g",
+      "title": "Wahlkrampf! Welcher Wechsel war der größte Karrierekiller?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 67,
+      "videoId": "z-aylcJcOHg",
+      "title": "Wahlkrampf! Was war der beste Fernschuss der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 68,
+      "videoId": "oGqQtThhy1A",
+      "title": "Wahlkrampf! Wer ist der beste Spanier der Bundesliga-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 69,
+      "videoId": "Kf0MHNStPUw",
+      "title": "Wahlkrampf! Wer ist der größte Judas der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 70,
+      "videoId": "DwTkESl8KWE",
+      "title": "Wahlkrampf! Was war die beste Rückholaktion des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 71,
+      "videoId": "ffKpQ-P2PYI",
+      "title": "Wahlkrampf! Welcher Spieler ist das größte \"What If\" der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 72,
+      "videoId": "AMTLA2_aVyM",
+      "title": "Wahlkrampf! Wer ist der schlechteste 100 Millionen-Transfer aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 73,
+      "videoId": "9qV38q6Grl0",
+      "title": "Wahlkrampf! Was war die beste Champions League-Saison der Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 74,
+      "videoId": "p6w7tq--nY0",
+      "title": "Wahlkrampf! Was ist der beste Fußballfilm aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 75,
+      "videoId": "BGUKeKH0Hf4",
+      "title": "Wahlkrampf! Wer ist die größte Vereinslegende der Bundesliga seit 2000?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 76,
+      "videoId": "P4ya7cFXgBc",
+      "title": "Wahlkrampf! Wer ist der beste ausländische Trainer der Bundesliga-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 77,
+      "videoId": "PWDuA06GuH0",
+      "title": "Wahlkrampf! Was war die beste Nachspielzeit des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 78,
+      "videoId": "wjz_3ypXqPc",
+      "title": "Wahlkrampf! Wer ist der beste Bundesliga-Spieler, der nie bei Bayern war?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 79,
+      "videoId": "tR2nMyOEnrU",
+      "title": "Wahlkrampf! Wer hat den besten Dreierpack der Geschichte geschnürt?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 80,
+      "videoId": "14vMD7W3ZQc",
+      "title": "Wahlkrampf! Welcher Pass ist der beste der Fußballgeschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 81,
+      "videoId": "-fWFqkQPAQM",
+      "title": "Wahlkrampf! Was war die schlechteste Schiri-Leistung des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 82,
+      "videoId": "VopzoF2OQ8s",
+      "title": "Wahlkrampf! Wer ist der beste Deutsche, der jemals in England gespielt hat?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 83,
+      "videoId": "ypobtKTrX18",
+      "title": "Wahlkrampf! Welcher Verlierer-Case hatte 2022 einen Sieg verdient?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 84,
+      "videoId": "LYbFfFZPN0w",
+      "title": "Wahlkrampf! Was war der größte Karma-Moment des Fußballs im 21. Jahrhundert?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 85,
+      "videoId": "pdw6mcJiLzg",
+      "title": "Wahlkrampf! Wer ist der beste Franzose der Bundesliga-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 86,
+      "videoId": "8PW5D8bBipY",
+      "title": "Wahlkrampf! Welches Deutschland-Trikot ist das Schönste aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 87,
+      "videoId": "n0R9iKRk37U",
+      "title": "Wahlkrampf! Der tragischste Fehlschuss bei einer WM seit 2000?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 88,
+      "videoId": "hn4mWr_704k",
+      "title": "Wahlkrampf! Was war das beste Elfmeterschießen aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 89,
+      "videoId": "9BQ5PNlFQes",
+      "title": "Wahlkrampf! Welcher WM-Ball ist der beste aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 90,
+      "videoId": "HuilvS6YpPM",
+      "title": "Wahlkrampf! Wer lieferte die beste Einzelleistung der WM-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 91,
+      "videoId": "-7WEwQaL_5w",
+      "title": "Wahlkrampf! Was war das beste WM-Spiel aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 92,
+      "videoId": "SDcWjvqSzqA",
+      "title": "Wahlkrampf! Was ist das schönste Tor der WM-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 93,
+      "videoId": "9PO8S6v2s9c",
+      "title": "Wahlkrampf! Wer ist der beste deutsche Fußballer aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 94,
+      "videoId": "JrqtxZSYTQk",
+      "title": "Wahlkrampf! Wer ist der beste Bayern-Transfer des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 95,
+      "videoId": "Cz1iJiBXVJc",
+      "title": "Wahlkrampf! Wer war der einflussreichste Nationalspieler unter Jogi Löw?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 96,
+      "videoId": "zsBukxx96po",
+      "title": "Wahlkrampf! Was war das legendärste Spiel des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 97,
+      "videoId": "TXEB9nyUIrE",
+      "title": "Wahlkrampf! Wer war der schlechteste BVB-Transfer der letzten 10 Jahre?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 98,
+      "videoId": "rdsDz94VbdU",
+      "title": "Wahlkrampf! Das schönste Tor der CL-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 99,
+      "videoId": "6yxPh2Zk8pU",
+      "title": "Wahlkrampf! Was war die beste Einwechslung aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 100,
+      "videoId": "vNX0qJFBCBw",
+      "title": "Wahlkrampf! Was war die beste Einzelleistung aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 101,
+      "videoId": "bUQxrOCsjy0",
+      "title": "Wahlkrampf! Der überraschendste Titel seit 2000?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 102,
+      "videoId": "M_ghG7NqkX4",
+      "title": "Wahlkrampf! Wer ist der drittbeste Spieler der Ära Messi x Ronaldo?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 103,
+      "videoId": "Q8RvP0DhDrI",
+      "title": "Wahlkrampf! Der unverdienteste Titel des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 104,
+      "videoId": "UHFgtL1ajbo",
+      "title": "Wahlkrampf! Wer war der schlechteste FCB-Transfer der letzten 10 Jahre?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Christoph"
+    },
+    {
+      "index": 105,
+      "videoId": "PXrDSjkio-U",
+      "title": "Wahlkrampf! Wer WIRD der beste Neuzugang der Saison 22/23?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Niklas"
+    },
+    {
+      "index": 106,
+      "videoId": "kqN00nAgVqo",
+      "title": "Wahlkrampf! Was war Manuel Neuers beste Einzelleistung?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 107,
+      "videoId": "pw-F59qlKYU",
+      "title": "Wahlkrampf! Was war der größte Heartbreak-Moment im Fußball seit 2000?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 108,
+      "videoId": "oWlckP_fcDQ",
+      "title": "Wahlkrampf! Wer ist der schlechteste Bundesliga-Trainer seit 2000?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 109,
+      "videoId": "PKQarY_lzhw",
+      "title": "Wahlkrampf! Die dümmste Trainer-Entlassung der letzten 20 Jahre?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 110,
+      "videoId": "R3q1MUPDaNc",
+      "title": "Wahlkrampf! Wer ist der beste Brasilianer der Bundesliga-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 111,
+      "videoId": "J8XDTeFXjWg",
+      "title": "Wahlkrampf! Was war die beste Grätsche des 21. Jahrhunderts?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 112,
+      "videoId": "iHoAfAqhH94",
+      "title": "Wahlkrampf! Wer ist der größte Kapitän aller Zeiten?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 113,
+      "videoId": "aIb8D4jnOXw",
+      "title": "Wahlkrampf! Was ist die beste Bromance des Fußballs?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    },
+    {
+      "index": 114,
+      "videoId": "OVWdwlvY2h0",
+      "title": "Wahlkrampf! Wer ist der härteste Hund der Fußball-Geschichte?",
+      "participants": [
+        "Nico",
+        "Niklas",
+        "Christoph"
+      ],
+      "winner": "Nico"
+    }
+  ]
+};
+
+    // State
+    let searchFilter = '';
+    let winnerFilter = 'ALL';
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    function calculateStats(episodesList) {
+      const stats = {
+        Nico: { wins: 0, participations: 0 },
+        Christoph: { wins: 0, participations: 0 },
+        Niklas: { wins: 0, participations: 0 },
+        Mia: { wins: 0, participations: 0 },
+        Grabo: { wins: 0, participations: 0 },
+        Alex: { wins: 0, participations: 0 },
+        Kier: { wins: 0, participations: 0 }
+      };
+
+      episodesList.forEach(ep => {
+        ep.participants.forEach(p => {
+          if (stats[p]) stats[p].participations++;
+        });
+        if (ep.winner && stats[ep.winner]) {
+          stats[ep.winner].wins++;
+        }
+      });
+
+      return stats;
+    }
+
+    function renderDashboard() {
+      const currentStats = calculateStats(wahlkrampfData.episodes);
+      
+      // Render Leaderboard (Main hosts)
+      const leaderboardEl = document.getElementById('leaderboard');
+      const hosts = ['Nico', 'Christoph', 'Niklas'];
+      
+      const sortedHosts = hosts.map(name => ({
+        name,
+        ...currentStats[name],
+        rate: currentStats[name].participations > 0 ? (currentStats[name].wins / currentStats[name].participations * 100) : 0
+      })).sort((a, b) => b.wins - a.wins);
+
+      leaderboardEl.innerHTML = '';
+      sortedHosts.forEach((host, idx) => {
+        const rank = idx + 1;
+        const cardClass = 'card rank-' + rank;
+        const rate = host.rate.toFixed(1);
+        
+        leaderboardEl.innerHTML += `
+          <div class="${cardClass}">
+            <div class="rank-badge">${rank}</div>
+            <h3 class="card-title">${host.name}</h3>
+            <div class="card-subtitle">Stamm-Host</div>
+            <div class="stat-large">${rate}%</div>
+            <div class="stat-bar-container">
+              <div class="stat-bar" style="width: ${rate}%"></div>
+            </div>
+            <div class="stat-row">
+              <span>Siege: <strong>${host.wins}</strong></span>
+              <span>Teilnahmen: <strong>${host.participations}</strong></span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Render Guests
+      const guestsEl = document.getElementById('guests-grid');
+      const guests = ['Mia', 'Grabo', 'Alex', 'Kier'];
+      
+      guestsEl.innerHTML = '';
+      guests.forEach(name => {
+        const guest = currentStats[name];
+        if (guest && guest.participations > 0) {
+          const rate = ((guest.wins / guest.participations) * 100).toFixed(1);
+          guestsEl.innerHTML += `
+            <div class="guest-card">
+              <span class="guest-name">${name}</span>
+              <div class="guest-stats">
+                <strong>${guest.wins}</strong> / ${guest.participations} Siege
+                <div style="font-size: 0.75rem; color: var(--accent-blue);">${rate}% Winrate</div>
+              </div>
+            </div>
+          `;
+        }
+      });
+    }
+
+    // Render Episode Table
+    function renderEpisodesTable() {
+      const tableBody = document.getElementById('episodes-table-body');
+      
+      const filtered = wahlkrampfData.episodes.filter(ep => {
+        const matchesSearch = ep.title.toLowerCase().includes(searchFilter.toLowerCase()) || ep.videoId.toLowerCase().includes(searchFilter.toLowerCase());
+        const matchesWinner = winnerFilter === 'ALL' || ep.winner === winnerFilter;
+        return matchesSearch && matchesWinner;
+      }).reverse(); // Latest episodes first
+
+      // Pagination
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+      
+      if (currentPage > totalPages) currentPage = Math.max(1, totalPages);
+      
+      const startIdx = (currentPage - 1) * itemsPerPage;
+      const endIdx = startIdx + itemsPerPage;
+      const paginatedItems = filtered.slice(startIdx, endIdx);
+
+      tableBody.innerHTML = '';
+      if (paginatedItems.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Keine Episoden gefunden.</td></tr>`;
+      } else {
+        paginatedItems.forEach(ep => {
+          const videoUrl = `https://youtu.be/${ep.videoId}`;
+          tableBody.innerHTML += `
+            <tr>
+              <td>#${ep.index}</td>
+              <td style="font-weight: 600;">${ep.title}</td>
+              <td>${ep.participants.join(', ')}</td>
+              <td><span class="badge winner">${ep.winner}</span></td>
+              <td>
+                <a href="${videoUrl}" target="_blank" class="table-link">
+                  <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Anschauen
+                </a>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Render Pagination Buttons
+      const paginationEl = document.getElementById('pagination');
+      paginationEl.innerHTML = '';
+      
+      if (totalPages > 1) {
+        // Prev button
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'btn-page';
+        prevBtn.innerHTML = '<i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.addEventListener('click', () => {
+          currentPage--;
+          renderEpisodesTable();
+        });
+        paginationEl.appendChild(prevBtn);
+
+        // Page buttons
+        for (let i = 1; i <= totalPages; i++) {
+          const pageBtn = document.createElement('button');
+          pageBtn.className = 'btn-page' + (i === currentPage ? ' active' : '');
+          pageBtn.innerText = i;
+          pageBtn.addEventListener('click', () => {
+            currentPage = i;
+            renderEpisodesTable();
+          });
+          paginationEl.appendChild(pageBtn);
+        }
+
+        // Next button
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'btn-page';
+        nextBtn.innerHTML = '<i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.addEventListener('click', () => {
+          currentPage++;
+          renderEpisodesTable();
+        });
+        paginationEl.appendChild(nextBtn);
+      }
+
+      // Re-initialize Lucide Icons
+      lucide.createIcons();
+    }
+
+    // Scroll Storytelling logic
+    const storySteps = document.querySelectorAll('.story-step');
+    const visualValue = document.getElementById('visual-value');
+    const visualLabel = document.getElementById('visual-label');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.6
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Deactivate all steps
+          storySteps.forEach(step => step.classList.remove('active'));
+          // Activate current step
+          entry.target.classList.add('active');
+          
+          // Animate the visual stick panel
+          const val = entry.target.getAttribute('data-visual');
+          const lab = entry.target.getAttribute('data-label');
+          
+          visualValue.innerText = val;
+          visualLabel.innerText = lab;
+        }
+      });
+    }, observerOptions);
+
+    storySteps.forEach(step => observer.observe(step));
+
+    // General scroll fade-in animation
+    const fadeSections = document.querySelectorAll('.fade-in-section');
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    fadeSections.forEach(s => sectionObserver.observe(s));
+
+    // Navbar scroll tracking
+    const navLinks = document.querySelectorAll('.nav-links a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      const scrollPos = window.scrollY + 100;
+      
+      document.querySelectorAll('section').forEach(s => {
+        const top = s.offsetTop;
+        const height = s.offsetHeight;
+        if (scrollPos >= top && scrollPos < top + height) {
+          current = s.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(a => {
+        a.classList.remove('active');
+        if (a.getAttribute('href') === '#' + current) {
+          a.classList.add('active');
+        }
+      });
+    });
+
+    // Event Listeners
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      searchFilter = e.target.value;
+      currentPage = 1;
+      renderEpisodesTable();
+    });
+
+    document.getElementById('winner-filter').addEventListener('change', (e) => {
+      winnerFilter = e.target.value;
+      currentPage = 1;
+      renderEpisodesTable();
+    });
+
+    // Initialize
+    lucide.createIcons();
+    renderDashboard();
+    renderEpisodesTable();
+  </script>
+</body>
+</html>
